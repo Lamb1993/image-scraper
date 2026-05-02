@@ -1,11 +1,6 @@
 
 import jpg6
 
-from urllib.parse import urljoin
-from bs4 import BeautifulSoup
-import os
-import requests
-
 
 image_hosts = ['jpg6', 'bunkr']
 
@@ -27,8 +22,8 @@ def main():
 
     match host_select:
         case 1:
-            jpg6.main(url)
-        case 4:
+            jpg6.jpg6(url).main(url)
+        case 2:
             print("bunkr support coming soon!")
 
 main()
