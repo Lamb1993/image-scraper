@@ -11,18 +11,18 @@ BASE = "https://jpg6.su" # might need to add multiple base URLs if the site has 
 
 
 class jpg6(Scraper):
-    def __init__(self, url):
+    def __init__(self, url: str):
         Scraper.__init__(self, url)
 
 
-    def get_next_page(self, soup):
+    def get_next_page(self, soup: BeautifulSoup):
         tag = soup.find("a", attrs={"data-pagination": "next"})
         if tag and tag.get("href"):
             return urljoin(BASE, tag["href"])
         return None
 
 
-    def scrape_pages(self, myURL):
+    def scrape_pages(self, myURL: str):
         url = myURL
         pages = []
 
@@ -38,7 +38,7 @@ class jpg6(Scraper):
         return pages
 
 
-    def image_scrape(self, images, folder_name):
+    def image_scrape(self, images: list, folder_name: str):
         imageCount = 0
 
         print(f"{len(images)} images found - ", end="")
@@ -51,10 +51,6 @@ class jpg6(Scraper):
 
         if len(images) != 0:
             for i, image in enumerate(images):
-
-                percent = i / len(images) * 100
-                sys.stdout.write(f"\rDownloading images: {percent:5.1f}% ({i}/{len(images)})")
-                sys.stdout.flush()
 
                 # search for "data_srcset"
                 try:
@@ -91,8 +87,14 @@ class jpg6(Scraper):
                     except UnicodeDecodeError: # If the content is not text, it will raise a UnicodeDecodeError which we can assume is an image.
                         image_name = image_link[image_link.rfind('/'):] #remove everything before the last "/" to get the image name
 
-                        with open(f"{folder_name}/{image_name}", "wb+") as f:
+                        folder_path = os.path.join(os.path.dirname(__file__), folder_name)
+
+                        with open(f"{folder_path}/{image_name}", "wb+") as f:
                             f.write(myReq)
+
+                            percent = (i + 1) / len(images) * 100
+                            sys.stdout.write(f"\rDownloading images: {percent:5.1f}% ({i + 1}/{len(images)})")
+                            sys.stdout.flush()
                         
                         imageCount += 1
 
@@ -101,24 +103,23 @@ class jpg6(Scraper):
                     pass
 
             if imageCount == len(images):
-                print("All images downloaded")
+                print(" - All images downloaded")
 
             else:
                 print(f"Downloaded {imageCount} out of {len(images)}")
 
 
-    def main(self, myURL):
+    def main(self, myURL: str, run_type_select: int):
 
         response = requests.get(myURL)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        run_type = input("Enter 'html' or 'image' mode: " )
         
-        if run_type == "html":
+        if run_type_select == 1:
             super().bs_output_save(soup)    
-        elif run_type == "image":
+        elif run_type_select == 2:
             folder_name = super().create_save_directory()
-            print("Getting page links...", end="")
+            print("Getting page links... ", end="")
             page_links = self.scrape_pages(myURL)
             print(f"Found {len(page_links)} pages")
             page = 1
