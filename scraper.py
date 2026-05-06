@@ -1,4 +1,5 @@
 import os
+import constants
 from bs4 import BeautifulSoup
 
 # Scraper class that contains shared methods for all scrapers to use. This is to avoid code 
@@ -18,16 +19,16 @@ class Scraper:
         return None
 
 
-    def create_save_directory(self):
+    def create_save_directory(self, folder_name: str) -> str:
+        download_path = os.path.join(constants.download_directory, folder_name)
+        
         try:
-            project_directory = os.path.dirname(__file__)
-            folder_name = input("Enter directory name: ")
-            os.mkdir(os.path.join(project_directory, folder_name))
+            os.mkdir(download_path)
         
         except:
             print("Directory already exists")
         
-        return folder_name
+        return download_path
     
 
     def bs_output_save(self, bs: BeautifulSoup):

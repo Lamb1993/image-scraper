@@ -1,28 +1,27 @@
 
 import jpg6
 import ehen
+import constants
 
-image_hosts = ['jpg6', 'e-hentai', 'EveriaClub', 'bunkr']
-run_type = ["html", "images"]
 
 def main():
     host_select = 0
 
-    while host_select < 1 or host_select > len(image_hosts):
+    while host_select < 1 or host_select > len(constants.image_hosts):
         print("Select an image host:")
         
-        for i, host in enumerate(image_hosts):
+        for i, host in enumerate(constants.image_hosts):
             print(f"{i + 1}. {host}")
 
         host_select = int(input("\nChoose an image host: "))
 
-    print(f"You selected: {image_hosts[host_select - 1]}")
+    print(f"You selected: {constants.image_hosts[host_select - 1]}")
 
     run_type_select = 0
-    while run_type_select < 1 or run_type_select > len(run_type):
+    while run_type_select < 1 or run_type_select > len(constants.run_type):
         print("\nSelect a run type:")
         
-        for i, rtype in enumerate(run_type):
+        for i, rtype in enumerate(constants.run_type):
             print(f"{i + 1}. {rtype}")
 
         run_type_select = int(input("\nChoose a run type: "))
@@ -40,3 +39,4 @@ def main():
             print("bunkr support coming soon!")
 
 main()
+

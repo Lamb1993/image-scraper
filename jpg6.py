@@ -86,7 +86,6 @@ class jpg6(Scraper):
 
                     except UnicodeDecodeError: # If the content is not text, it will raise a UnicodeDecodeError which we can assume is an image.
                         image_name = image_link[image_link.rfind('/'):] #remove everything before the last "/" to get the image name
-
                         folder_path = os.path.join(os.path.dirname(__file__), folder_name)
 
                         with open(f"{folder_path}/{image_name}", "wb+") as f:
@@ -118,7 +117,10 @@ class jpg6(Scraper):
         if run_type_select == 1:
             super().bs_output_save(soup)    
         elif run_type_select == 2:
-            folder_name = super().create_save_directory()
+            tag = soup.find('a', {'data-text': True})
+            folder_name = tag.contents[0] if tag.get('data-text') == 'album-name' else "jpg6_gallery" # name of the gallery. if it cannot be found, use "jpg6_gallery" as the default folder name
+            download_path = super().create_save_directory(folder_name)
+
             print("Getting page links... ", end="")
             page_links = self.scrape_pages(myURL)
             print(f"Found {len(page_links)} pages")
@@ -129,7 +131,7 @@ class jpg6(Scraper):
                 response = requests.get(p)
                 soup = BeautifulSoup(response.text, 'html.parser')
                 images = soup.find_all('img')
-                self.image_scrape(images, folder_name)
+                self.image_scrape(images, download_path)
                 page += 1
             
         else:

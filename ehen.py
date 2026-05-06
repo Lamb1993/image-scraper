@@ -41,22 +41,6 @@ class ehen(Scraper):
                     return tag.contents[0]
         return None
 
-    # might not be needed
-    def scrape_pages(self, myURL: str):
-        url = myURL
-        pages = []
-
-        print("Getting total number of pages...")
-
-        while url:
-            html = requests.get(url).text
-            soup = BeautifulSoup(html, "html.parser")
-
-            pages.append(url)
-            url = self.get_next_page(soup)
-
-        return pages
-
     # create headers with a random user-agent to avoid download rate issues. The headers are prepared for each image request to make 
     # it appear as if the requests are coming from different browsers and devices, which can help to avoid detection and reduce the 
     # chances of being blocked by the server. 
@@ -89,36 +73,12 @@ class ehen(Scraper):
                 # Even 5 seconds is not long enough
                 time.sleep(sleepTime) # sleep for some time to avoid download rate issues
 
-                # headers = self.prepare_headers(image_link)
-                # session = requests.Session()
-                # session.headers.update(headers)
-                # try:
-                #     response = session.get(image_link)
-                #     response.raise_for_status
-
-                #     folder_path = os.path.join(os.path.dirname(__file__), folder_name)
-
-                #     with Path(folder_path).open("wb") as f:
-                #         for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
-                #             f.write(chunk)
-
-                #         percent = (i + 1) / len(images) * 100
-                #         sys.stdout.write(f"\rDownloading images: {percent:5.1f}% ({i + 1}/{len(images)})")
-                #         sys.stdout.flush()
-                    
-                #     imageCount += 1
-                # except requests.RequestException as e:
-                #     print(f"\nError downloading {image_link}: {e}")
-                #     continue
-
-
                 headers = self.prepare_headers(image_link)
                 session = requests.Session()
                 session.headers.update(headers)
                 response = session.get(image_link)
                 response.raise_for_status
                 myReq = requests.get(image_link, headers=headers).content
-                # myReq = requests.get(image_link).content
 
                 try:
                     myReq = str(myReq, 'utf-8')
@@ -147,32 +107,32 @@ class ehen(Scraper):
     def main(self, myURL: str, run_type_select: int):
         response = requests.get(myURL)
         soup = BeautifulSoup(response.text, 'html.parser')
-
+        folder_name = soup.find("h1", id="gn").contents[0] # name of the gallery
+        download_path = super().create_save_directory(folder_name)
+            
         if run_type_select == 1:
             super().bs_output_save(soup)
-        elif run_type_select == 2:
-            folder_name = super().create_save_directory()
 
+        elif run_type_select == 2:
             number_of_pages = self.get_total_pages(soup)
             
-            if number_of_pages is None:
-                print("Could not determine the total number of pages. Scraping the first page only.")
-
+            if number_of_pages is None: # assume 1 page in the gallery
                 image_grid = soup.find('div', id="gdt")
                 images_links = image_grid.find_all('a', href=True)
+                image_list = [] # list of all the image source URL's
 
                 print("Getting image links... ", end="")
-                image_list = [] # list of all the image source URL's
+
                 for link in images_links: # create a list of source image URL's for a given gallery page
                     response = requests.get(link['href'])
                     soup = BeautifulSoup(response.text, 'html.parser')
                     image = soup.find('img', id="img")
                     image_list.append(image["src"])
 
-                self.image_scrape(image_list, folder_name)
+                self.image_scrape(image_list, download_path)
                 
-            else: 
-                for page in range(int(number_of_pages)):
+            else: # more than 1 page in the gallery
+                for page in range(int(number_of_pages)): # go through each page in the gallery
                     print(f"Scraping page {page + 1} of {number_of_pages}...")
                     
                     response = requests.get(myURL + URL_PAGE_SUFFIX + str(page))
@@ -180,15 +140,15 @@ class ehen(Scraper):
 
                     image_grid = soup.find('div', id="gdt")
                     images_links = image_grid.find_all('a', href=True)
+                    image_list = [] # list of all the image source URL's
 
                     print("Getting image links... ", end="")
-                    image_list = [] # list of all the image source URL's
                     for link in images_links: # create a list of source image URL's for a given gallery page
                         response = requests.get(link['href'])
                         soup = BeautifulSoup(response.text, 'html.parser')
                         image = soup.find('img', id="img")
                         image_list.append(image["src"])
 
-                    self.image_scrape(image_list, folder_name)
+                    self.image_scrape(image_list, download_path)
         else:
             print("Invalid mode selected. Please enter 'html' or 'image'.")
