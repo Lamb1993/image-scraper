@@ -2,7 +2,7 @@
 import jpg6
 import ehen
 
-image_hosts = ['jpg6', 'bunkr']
+image_hosts = ['jpg6', 'e-hentai', 'EveriaClub', 'bunkr']
 run_type = ["html", "images"]
 
 def main():
@@ -33,6 +33,10 @@ def main():
         case 1:
             jpg6.jpg6(url).main(url, run_type_select)
         case 2:
+            ehen.ehen(url).main(url, run_type_select)
+        case 3:
+            print("EveriaClub support coming soon!")
+        case 4:
             print("bunkr support coming soon!")
 
 main()

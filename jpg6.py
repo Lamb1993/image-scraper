@@ -15,7 +15,7 @@ class jpg6(Scraper):
         Scraper.__init__(self, url)
 
 
-    def get_next_page(self, soup: BeautifulSoup):
+    def get_next_page(self, soup: BeautifulSoup) -> str:
         tag = soup.find("a", attrs={"data-pagination": "next"})
         if tag and tag.get("href"):
             return urljoin(BASE, tag["href"])
