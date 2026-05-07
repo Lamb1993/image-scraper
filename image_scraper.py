@@ -2,24 +2,19 @@
 import jpg6
 import ehen
 import constants
+from urllib.parse import urlparse
+import requests
+
+
+def get_base_url(url: str) -> str:
+    parsed_url = urlparse(url)
+    return f"{parsed_url.scheme}://{parsed_url.netloc}"
 
 
 def main():
-    host_select = 0
-
-    while host_select < 1 or host_select > len(constants.image_hosts):
-        print("Select an image host:")
-        
-        for i, host in enumerate(constants.image_hosts):
-            print(f"{i + 1}. {host}")
-
-        host_select = int(input("\nChoose an image host: "))
-
-    print(f"You selected: {constants.image_hosts[host_select - 1]}")
-
     run_type_select = 0
     while run_type_select < 1 or run_type_select > len(constants.run_type):
-        print("\nSelect a run type:")
+        print("Select a run type:")
         
         for i, rtype in enumerate(constants.run_type):
             print(f"{i + 1}. {rtype}")
@@ -27,16 +22,19 @@ def main():
         run_type_select = int(input("\nChoose a run type: "))
 
     url = input("Enter the desired URL: ")
+    base_url = get_base_url(url)
 
-    match host_select:
-        case 1:
+    match constants.image_hosts_urls[base_url]:
+        case "jpg6":
             jpg6.jpg6(url).main(url, run_type_select)
-        case 2:
+        case "e-hentai":
             ehen.ehen(url).main(url, run_type_select)
-        case 3:
+        case "EveriaClub":
             print("EveriaClub support coming soon!")
-        case 4:
+        case "bunkr":
             print("bunkr support coming soon!")
+        case _:
+            print("Host not supported. Please enter a valid URL from the supported hosts.")
 
-main()
-
+if __name__ == "__main__":
+    main()

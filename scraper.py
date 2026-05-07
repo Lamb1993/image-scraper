@@ -20,6 +20,11 @@ class Scraper:
 
 
     def create_save_directory(self, folder_name: str) -> str:
+        # Sanitize folder name for Windows (remove invalid characters)
+        invalid_chars = '<>:"|?*\\//'
+        for char in invalid_chars:
+            folder_name = folder_name.replace(char, '_')
+        
         download_path = os.path.join(constants.download_directory, folder_name)
         
         try:

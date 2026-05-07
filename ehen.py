@@ -85,7 +85,6 @@ class ehen(Scraper):
 
                 except UnicodeDecodeError: # If the content is not text, it will raise a UnicodeDecodeError which we can assume is an image.
                     image_name = image_link[image_link.rfind('/'):] #remove everything before the last "/" to get the image name
-
                     folder_path = os.path.join(os.path.dirname(__file__), folder_name)
 
                     with open(f"{folder_path}/{image_name}", "wb+") as f:
