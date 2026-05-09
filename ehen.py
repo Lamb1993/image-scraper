@@ -65,7 +65,7 @@ class ehen(Scraper):
     def image_scrape(self, images: list, folder_name: str):
         imageCount = 0
 
-        print(f"{len(images)} images found")
+        print(f"-{len(images)} images found")
 
         if len(images) != 0:
             for i, image_link in enumerate(images):
@@ -77,24 +77,32 @@ class ehen(Scraper):
                 session = requests.Session()
                 session.headers.update(headers)
                 response = session.get(image_link)
-                response.raise_for_status
-                myReq = requests.get(image_link, headers=headers).content
+                response.raise_for_status()
+                imageData = requests.get(image_link, headers=headers).content
 
                 try:
-                    myReq = str(myReq, 'utf-8')
+                    imageData = str(imageData, 'utf-8')
 
                 except UnicodeDecodeError: # If the content is not text, it will raise a UnicodeDecodeError which we can assume is an image.
-                    image_name = image_link[image_link.rfind('/'):] #remove everything before the last "/" to get the image name
+                    image_name = image_link[image_link.rfind('/') + 1:] # remove everything before the last "/" to get the image name
+                    base, ext = os.path.splitext(image_name) # base = image name, ext = image extension
                     folder_path = os.path.join(os.path.dirname(__file__), folder_name)
+                    file_path = os.path.join(folder_path, image_name)
 
-                    with open(f"{folder_path}/{image_name}", "wb+") as f:
-                        f.write(myReq) # save the file
+                    if Path(file_path).exists():
+                        print(f"Image {image_name} already exists, adding a counter to the file name")
+                        image_name = f"{base}({i}){ext}"
+                        file_path = os.path.join(folder_path, image_name) # build new file_path with the image name with counter
 
+                    with open(file_path, "wb+") as f:
+                        f.write(imageData) # save the file (with or without counter)
+
+                        # only increment image count if an image was successfully saved.
                         percent = (i + 1) / len(images) * 100
                         sys.stdout.write(f"\rDownloading images: {percent:5.1f}% ({i + 1}/{len(images)})")
                         sys.stdout.flush()
                     
-                    imageCount += 1
+                        imageCount += 1
 
             if imageCount == len(images):
                 print("\nAll images downloaded")
