@@ -57,6 +57,8 @@ def main():
                 jpg6.jpg6(url).main(url, run_type_select)
             case "e-hentai":
                 ehen.ehen(url).main(url, run_type_select)
+            case "kemono":
+                print("Kemono support coming soon!")
             case "EveriaClub":
                 print("EveriaClub support coming soon!")
             case "bunkr":

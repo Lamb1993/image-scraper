@@ -123,7 +123,6 @@ class jpg6(Scraper):
         response = requests.get(myURL)
         soup = BeautifulSoup(response.text, 'html.parser')
 
-        
         if run_type_select == 1:
             super().bs_output_save(soup)    
         elif run_type_select == 2:
