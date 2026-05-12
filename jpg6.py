@@ -119,8 +119,11 @@ class jpg6(Scraper):
 
 
     def main(self, myURL: str, run_type_select: int):
-
         response = requests.get(myURL)
+        if response.status_code != 200:
+            print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+            return
+        
         soup = BeautifulSoup(response.text, 'html.parser')
 
         if run_type_select == 1:

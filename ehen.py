@@ -1,5 +1,6 @@
 import sys
 from urllib.parse import urlparse
+import http.client
 from bs4 import BeautifulSoup
 import requests
 import os
@@ -73,12 +74,22 @@ class ehen(Scraper):
                 # Even 5 seconds is not long enough
                 time.sleep(sleepTime) # sleep for some time to avoid download rate issues
 
-                headers = self.prepare_headers(image_link)
-                session = requests.Session()
-                session.headers.update(headers)
-                response = session.get(image_link)
-                response.raise_for_status()
-                imageData = requests.get(image_link, headers=headers).content
+                try:
+                    headers = self.prepare_headers(image_link)
+                    session = requests.Session()
+                    session.headers.update(headers)
+                    response = session.get(image_link)
+                    response.raise_for_status()
+                    imageData = response.content
+                    # imageData = requests.get(image_link, headers=headers).content
+                
+                except (requests.exceptions.ChunkedEncodingError,
+                            requests.exceptions.ConnectionError,
+                            requests.exceptions.Timeout,
+                            http.client.IncompleteRead) as e:
+
+                            print(f" - Failed to download {image_link}, SKIP IT")
+                            continue  # skip this image
 
                 try:
                     imageData = str(imageData, 'utf-8')
@@ -89,10 +100,12 @@ class ehen(Scraper):
                     folder_path = os.path.join(os.path.dirname(__file__), folder_name)
                     file_path = os.path.join(folder_path, image_name)
 
-                    if Path(file_path).exists():
-                        print(f"Image {image_name} already exists, adding a counter to the file name")
-                        image_name = f"{base}({i}){ext}"
+                    # check for duplicates and prevent overwriting
+                    counter = 1
+                    while Path(file_path).exists():
+                        image_name = f"{base}({counter}){ext}"
                         file_path = os.path.join(folder_path, image_name) # build new file_path with the image name with counter
+                        counter += 1
 
                     with open(file_path, "wb+") as f:
                         f.write(imageData) # save the file (with or without counter)
@@ -113,6 +126,10 @@ class ehen(Scraper):
 
     def main(self, myURL: str, run_type_select: int):
         response = requests.get(myURL)
+        if response.status_code != 200:
+            print(f"Failed to retrieve the webpage. Status code: {response.status_code}")
+            return
+
         soup = BeautifulSoup(response.text, 'html.parser')
         folder_name = soup.find("h1", id="gn").contents[0] # name of the gallery
         download_path = super().create_save_directory(folder_name)

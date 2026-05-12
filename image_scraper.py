@@ -1,6 +1,7 @@
 import os
 import jpg6
 import ehen
+import kemono
 import constants
 from urllib.parse import urlparse
 
@@ -58,7 +59,8 @@ def main():
             case "e-hentai":
                 ehen.ehen(url).main(url, run_type_select)
             case "kemono":
-                print("Kemono support coming soon!")
+                kemono.kemono(url).main(url, run_type_select)
+                print("Kemono support coming soon! (if it isn't dead)")
             case "EveriaClub":
                 print("EveriaClub support coming soon!")
             case "bunkr":
